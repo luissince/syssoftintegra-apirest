@@ -1,0 +1,113 @@
+definitions:
+  model.Detalle:
+    properties:
+      descripcion:
+        type: string
+      estado:
+        type: string
+      idAuxiliar:
+        type: string
+      idDetalle:
+        type: integer
+      idMantenimiento:
+        type: string
+      nombre:
+        type: string
+      usuarioRegistro:
+        type: string
+    type: object
+  model.Empleado:
+    properties:
+      apellidos:
+        type: string
+      celular:
+        type: string
+      clave:
+        type: string
+      detalle:
+        $ref: '#/definitions/model.Detalle'
+      direccion:
+        type: string
+      email:
+        type: string
+      estado:
+        type: integer
+      fechaNacimiento:
+        type: string
+      huella:
+        type: string
+      idEmpleado:
+        type: string
+      idRol:
+        type: integer
+      nombres:
+        type: string
+      numeroDocumento:
+        type: string
+      puesto:
+        type: integer
+      rol:
+        $ref: '#/definitions/model.Rol'
+      sexo:
+        type: integer
+      sistema:
+        type: boolean
+      telefono:
+        type: string
+      tipoDocumento:
+        type: integer
+      usuario:
+        type: string
+    type: object
+  model.Error:
+    properties:
+      message:
+        type: string
+    type: object
+  model.Rol:
+    properties:
+      idRol:
+        type: integer
+      nombre:
+        type: string
+      sistema:
+        type: boolean
+    type: object
+info:
+  contact: {}
+paths:
+  /login:
+    get:
+      consumes:
+      - application/json
+      description: Iniciar Sesión del Empleado
+      parameters:
+      - description: Usuario para iniciar sesión
+        in: query
+        name: usuario
+        required: true
+        type: string
+      - description: Clave para iniciar sesión
+        in: query
+        name: clave
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Empleado'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Para el inicio de sesión
+      tags:
+      - Empleado
+swagger: "2.0"
