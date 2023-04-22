@@ -56,7 +56,7 @@ func main() {
 	routes.MonedaRoutes(app.Group(basePath))
 
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	app.Run(go_port)
+	app.Run(":" + go_port)
 
 	// Rutas del servicio de la API
 	// router.GET(v1+"/login", service.Login)
