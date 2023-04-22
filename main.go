@@ -36,7 +36,7 @@ func main() {
 		return
 	}
 
-	var go_port string = os.Getenv("GO_PORT")
+	var url_domain string = os.Getenv("URL_DOMAIN")
 	var tz_location string = os.Getenv("TZ_LOCATION")
 
 	// Estabecle la zora horario
@@ -56,7 +56,7 @@ func main() {
 	routes.MonedaRoutes(app.Group(basePath))
 
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	app.Run(":" + go_port)
+	app.Run(url_domain)
 
 	// Rutas del servicio de la API
 	// router.GET(v1+"/login", service.Login)
