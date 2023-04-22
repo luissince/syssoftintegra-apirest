@@ -14,21 +14,19 @@ import (
 func connectionString() string {
 
 	err := godotenv.Load(".env")
-
 	if err != nil {
 		return err.Error()
-	} else {
-		server := os.Getenv("HOSTNAME")
-		port := os.Getenv("PORT")
-		user := os.Getenv("USER_NAME")
-		password := os.Getenv("PASSWORD")
-		database := os.Getenv("DATABASE")
-
-		connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", server, user, password, port, database)
-
-		return connString
 	}
 
+	server := os.Getenv("HOSTNAME")
+	port := os.Getenv("PORT")
+	user := os.Getenv("USER_NAME")
+	password := os.Getenv("PASSWORD")
+	database := os.Getenv("DATABASE")
+
+	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", server, user, password, port, database)
+
+	return connString
 }
 
 // CreateConnection -> Crea la conexion a la base de datos
@@ -45,5 +43,5 @@ func CreateConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	return db, err
+	return db, nil
 }

@@ -2,7 +2,7 @@ package main
 
 import (
 	// "fmt"
-	"syssoftintegra-api/src/controller"
+	"syssoftintegra-api/src/routes"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -15,30 +15,22 @@ import (
 
 func main() {
 
-	router := gin.Default()
+	app := gin.Default()
 
 	// Middleware para CORS
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}
-	router.Use(cors.New(config))
+	app.Use(cors.New(config))
 
 	// Agregar el swagger
 	basePath := "/api/v1"
 	docs.SwaggerInfo.BasePath = basePath
 
-	empleado := router.Group(basePath)
-	{
-		empleado.GET("/login", controller.Login)
-		empleado.GET("/empleados", controller.GetAllEmpleado)
-		empleado.GET("/empleado", controller.GetEmpleadoById)
-		empleado.POST("/empleado", controller.IUEmpledo)
-		// empleado.PUT("/empleado", controller.UpdateEmpleado)
-		empleado.DELETE("/empleado/:idEmpleado", controller.DeleteEmpleado)
+	routes.EmpleadoRoutes(app.Group(basePath))
+	routes.MonedaRoutes(app.Group(basePath))
 
-	}
-
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	router.Run("localhost:3000")
+	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	app.Run("localhost:3000")
 
 	// Rutas del servicio de la API
 	// router.GET(v1+"/login", service.Login)

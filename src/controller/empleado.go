@@ -30,34 +30,26 @@ func Login(c *gin.Context) {
 	usuario := c.Query("usuario")
 	clave := c.Query("clave")
 
-	empleado, err := service.Login(contx, usuario, clave)
-	if err == "error" {
-		c.IndentedJSON(http.StatusInternalServerError, model.Error{
-			Message: "Se produjo un error interno.",
-		})
+	empleado, rpta := service.Login(contx, usuario, clave)
+	if rpta == "empty" {
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "El usuario o la clave es incorrecto, o no existe el usuario"})
+		return
+	}
+	if rpta == "ok" {
+		c.IndentedJSON(http.StatusOK, empleado)
 		return
 	}
 
-	if err == "empty" {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "Usuario o clave incorrecta.",
-		})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, empleado)
+	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
 
 }
 
 func GetAllEmpleado(c *gin.Context) {
 
 	//Se lee los parametros del la url
-
 	opcion, err := strconv.Atoi(c.Query("opcion"))
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "No se puede parcear el primer parametro.",
-		})
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se puede parcear el primer parametro"})
 		return
 	}
 
@@ -65,90 +57,60 @@ func GetAllEmpleado(c *gin.Context) {
 
 	posicionPagina, err := strconv.Atoi(c.Query("posicionPagina"))
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "No se puede parcear el tercer parametro.",
-		})
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se puede parcear el tercer parametro"})
 		return
 	}
-
 	filasPorPagina, err := strconv.Atoi(c.Query("filasPorPagina"))
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "No se puede parcear el cuarto parametro.",
-		})
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se puede parcear el cuarto parametro"})
 		return
 	}
 
 	// Se hace la petición a la base de datos
-	empleados, total, errString := service.GetAllEmpleado(contx, opcion, search, posicionPagina, filasPorPagina)
-	if errString == "error" {
-		c.IndentedJSON(http.StatusInternalServerError, model.Error{
-			Message: "Se produjo un error interno.",
-		})
+	empleados, total, rpta := service.GetAllEmpleado(contx, opcion, search, posicionPagina, filasPorPagina)
+	if rpta == "empty" {
+		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se encontraron resultados"})
 		return
 	}
-
-	if errString == "empty" {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "No se encontrantron resultado.",
-		})
-		return
+	if rpta == "ok" {
+		c.IndentedJSON(http.StatusOK, gin.H{"total": total, "resultado": empleados})
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"total": total, "resultado": empleados})
+	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
 
 }
 
 func GetEmpleadoById(c *gin.Context) {
 
-	// idEmpleado, err := strconv.Atoi(c.Query("idEmpleado"))
 	idEmpleado := c.Query("idEmpleado")
-	// idEmpleado := c.Param("idEmpleado")
 
-	empleado, err := service.GetEmpleadoById(contx, idEmpleado)
-
-	if err == "error" {
-		c.IndentedJSON(http.StatusInternalServerError, model.Error{
-			Message: "Se produjo un error interno.",
-		})
+	empleado, rpta := service.GetEmpleadoById(contx, idEmpleado)
+	if rpta == "empty" {
+		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se encontraron resultados"})
+		return
+	}
+	if rpta == "ok" {
+		c.IndentedJSON(http.StatusOK, empleado)
 		return
 	}
 
-	if err == "empty" {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "No se encontrantron resultado.",
-		})
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, empleado)
+	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
 
 }
 
-func IUEmpledo(c *gin.Context) {
+func InsertUpdateEmpledo(c *gin.Context) {
 
 	var empleado model.Empleado
 
 	err := c.BindJSON(&empleado)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "No se pudo parsear el body",
-		})
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se pudo parsear el body"})
 		return
 	}
 
-	rpta := service.IUEmpledo(contx, &empleado)
-
-	if rpta == "error" {
-		c.IndentedJSON(http.StatusInternalServerError, model.Error{
-			Message: "Se produjo un error interno.",
-		})
-		return
-	}
+	rpta := service.InsertUpdateEmpledo(contx, &empleado)
 	if rpta == "empty" {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "Se produjo un error al realizar la operación.",
-		})
+		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
 		return
 	}
 	if rpta == "update" {
@@ -160,26 +122,33 @@ func IUEmpledo(c *gin.Context) {
 		return
 	}
 
+	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
+
 }
 
 func DeleteEmpleado(c *gin.Context) {
 	idEmpleado := c.Param("idEmpleado")
 
-	rpta := service.DeleteEmpleado(contx, idEmpleado)
-
-	if rpta == "error" {
-		c.IndentedJSON(http.StatusInternalServerError, model.Error{
-			Message: "Se produjo un error interno.",
-		})
+	validar := service.ValidarSistemaEmpledo(idEmpleado)
+	if validar == "sistema" {
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se puede eliminar el empledo por que es parte del sistema"})
 		return
 	}
+	if validar == "empty" {
+		operacion := service.DeleteEmpleado(contx, idEmpleado)
+		if operacion == "empty" {
+			c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
+			return
+		} else if operacion == "delete" {
+			c.IndentedJSON(http.StatusOK, gin.H{"Message": "delete"})
+			return
+		} else {
+			c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: operacion})
+			return
+		}
 
-	if rpta == "empty" {
-		c.IndentedJSON(http.StatusBadRequest, model.Error{
-			Message: "Se produjo un error al realizar la operación.",
-		})
-		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": rpta})
+	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: validar})
+
 }

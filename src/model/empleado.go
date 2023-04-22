@@ -5,6 +5,8 @@ import (
 )
 
 type Empleado struct {
+	Count int `json:"count,omitempty"`
+
 	IdEmpleado      string    `json:"idEmpleado,omitempty"`
 	TipoDocumento   int       `json:"tipoDocumento,omitempty"`
 	NumeroDocumento string    `json:"numeroDocumento,omitempty,omitempty"`
@@ -23,7 +25,8 @@ type Empleado struct {
 	Clave           string    `json:"clave,omitempty"`
 	Sistema         bool      `json:"sistema,omitempty"`
 	Huella          string    `json:"huella,omitempty"`
-	Rol             Rol
-	Detalle         Detalle
+
+	Rol     Rol
+	Detalle Detalle
 	// Huella sql.NullString `json:"huella"`
 }

@@ -8,41 +8,46 @@ import (
 	"syssoftintegra-api/src/model"
 )
 
-func Login(contx context.Context, usuario string, clave string) (model.Empleado, string) {
+func Login(ctx context.Context, usuario string, clave string) (model.Empleado, string) {
 	empleado := model.Empleado{}
 
 	db, err := database.CreateConnection()
 	if err != nil {
-		return empleado, "error"
+		return empleado, err.Error()
 	}
 	defer db.Close()
 
 	queryStore := `exec Sp_Validar_Ingreso @usuario, @clave`
-	row := db.QueryRowContext(contx, queryStore, sql.Named("usuario", usuario), sql.Named("clave", clave))
+	row := db.QueryRowContext(ctx, queryStore, sql.Named("usuario", usuario), sql.Named("clave", clave))
 
 	err = row.Scan(&empleado.IdEmpleado, &empleado.Apellidos, &empleado.Nombres, &empleado.Rol.Nombre, &empleado.Estado, &empleado.Estado)
-	if err == sql.ErrNoRows || err != nil {
+	if err == sql.ErrNoRows {
 		return empleado, "empty"
+	}
+	if err != nil {
+		return empleado, err.Error()
 	}
 
 	return empleado, "ok"
 }
 
-func GetAllEmpleado(contx context.Context, opcion int, search string, posicionPagina int, filasPorPagina int) ([]model.Empleado, int, string) {
+func GetAllEmpleado(ctx context.Context, opcion int, search string, posicionPagina int, filasPorPagina int) ([]model.Empleado, int, string) {
 
 	empleados := []model.Empleado{}
 
 	db, err := database.CreateConnection()
 	if err != nil {
-		return empleados, 0, "error"
+		return nil, 0, err.Error()
 	}
 	defer db.Close()
 
 	queryStoreOne := `exec Sp_Listar_Empleados @opcion, @search, @posicionPagina, @filasPorPagina`
-
-	rows, err := db.QueryContext(contx, queryStoreOne, sql.Named("opcion", opcion), sql.Named("search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
-	if err == sql.ErrNoRows || err != nil {
-		return empleados, 0, "empty"
+	rows, err := db.QueryContext(ctx, queryStoreOne, sql.Named("opcion", opcion), sql.Named("search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
+	if err == sql.ErrNoRows {
+		return nil, 0, "empty"
+	}
+	if err != nil {
+		return nil, 0, err.Error()
 	}
 	defer rows.Close()
 
@@ -61,30 +66,32 @@ func GetAllEmpleado(contx context.Context, opcion int, search string, posicionPa
 			&empleado.Detalle.Nombre,
 		)
 		if err != nil {
-			return empleados, 0, "error"
+			return nil, 0, err.Error()
 		}
 		empleados = append(empleados, empleado)
 	}
 
 	var total int
-	queryStoreTwo := `exec Sp_Listar_Empleados_Count @posicionPagina, @filasPorPagina`
-
-	row := db.QueryRowContext(contx, queryStoreTwo, sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
+	queryStoreTwo := `exec Sp_Listar_Empleados_Count @opcion, @search`
+	row := db.QueryRowContext(ctx, queryStoreTwo, sql.Named("opcion", opcion), sql.Named("search", search))
 	err = row.Scan(&total)
-	if err == sql.ErrNoRows || err != nil {
-		return empleados, 0, "empty"
+	if err == sql.ErrNoRows {
+		return nil, 0, "empty"
+	}
+	if err != nil {
+		return nil, 0, err.Error()
 	}
 
 	return empleados, total, "ok"
 }
 
-func GetEmpleadoById(contx context.Context, idEmpleado string) (model.Empleado, string) {
+func GetEmpleadoById(ctx context.Context, idEmpleado string) (model.Empleado, string) {
 
 	empleado := model.Empleado{}
 
 	db, err := database.CreateConnection()
 	if err != nil {
-		return empleado, "error"
+		return empleado, err.Error()
 	}
 	defer db.Close()
 
@@ -111,8 +118,7 @@ func GetEmpleadoById(contx context.Context, idEmpleado string) (model.Empleado, 
 
 	// query :=`SELECT TOP(1) * FROM EmpleadoTB WHERE IdEmpleado = @idEmpleado`
 
-	row := db.QueryRowContext(contx, query, sql.Named("IdEmpleado", idEmpleado))
-
+	row := db.QueryRowContext(ctx, query, sql.Named("IdEmpleado", idEmpleado))
 	err = row.Scan(
 		&empleado.IdEmpleado,
 		&empleado.TipoDocumento,
@@ -133,43 +139,45 @@ func GetEmpleadoById(contx context.Context, idEmpleado string) (model.Empleado, 
 		&empleado.Sistema,
 		&empleado.Huella,
 	)
-	if err == sql.ErrNoRows || err != nil {
+	if err == sql.ErrNoRows {
 		return empleado, "empty"
+	}
+	if err != nil {
+		return empleado, err.Error()
 	}
 
 	return empleado, "ok"
 }
 
-func IUEmpledo(contx context.Context, empleado *model.Empleado) string {
+func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
 
 	db, err := database.CreateConnection()
 	if err != nil {
-		return "error"
+		return err.Error()
 	}
 	defer db.Close()
 
 	if empleado.IdEmpleado == "" {
 
 		var newId string
-		queryfunc := `SELECT dbo.Fc_Empleado_Codigo_Alfanumerico()`
-		row := db.QueryRowContext(contx, queryfunc)
-
+		queryCodAlfa := `SELECT dbo.Fc_Empleado_Codigo_Alfanumerico()`
+		row := db.QueryRowContext(ctx, queryCodAlfa)
 		err = row.Scan(&newId)
-		if err != nil {
-			return "error"
+		if err == sql.ErrNoRows || err != nil {
+			return err.Error()
 		}
 
-		tx, err := db.BeginTx(contx, nil)
+		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {
 			tx.Rollback()
-			return "error"
+			return err.Error()
 		}
 
 		query := `INSERT INTO EmpleadoTB (IdEmpleado, TipoDocumento, NumeroDocumento, Apellidos, Nombres, Sexo, FechaNacimiento, Puesto, Rol, Estado, Telefono, Celular, Email, Direccion, Usuario, Clave, Sistema, Huella)
 				VALUES (IdEmpleado @TipoDocumento, @NumeroDocumento, @Apellidos, @Nombres, @Sexo, @FechaNacimiento, @Puesto, @Rol, @Estado, @Telefono, @Celular, @Email, @Direccion, @Usuario, @Clave, @Sistema, @Huella)`
 
 		result, err := tx.ExecContext(
-			contx,
+			ctx,
 			query,
 			sql.Named("IdEmpleado", newId),
 			sql.Named("TipoDocumento", empleado.TipoDocumento),
@@ -192,13 +200,13 @@ func IUEmpledo(contx context.Context, empleado *model.Empleado) string {
 		)
 		if err != nil {
 			tx.Rollback()
-			return "error"
+			return err.Error()
 		}
 
 		value, err := result.RowsAffected()
 		if err != nil {
 			tx.Rollback()
-			return "error"
+			return err.Error()
 		}
 
 		if value == 0 {
@@ -212,10 +220,10 @@ func IUEmpledo(contx context.Context, empleado *model.Empleado) string {
 
 	} else {
 
-		tx, err := db.BeginTx(contx, nil)
+		tx, err := db.BeginTx(ctx, nil)
 		if err != nil {
 			tx.Rollback()
-			return "error"
+			return err.Error()
 		}
 
 		query := `UPDATE EmpleadoTB SET 
@@ -239,7 +247,7 @@ func IUEmpledo(contx context.Context, empleado *model.Empleado) string {
 			WHERE IdEmpleado = @IdEmpleado`
 
 		result, err := tx.ExecContext(
-			contx,
+			ctx,
 			query,
 			sql.Named("TipoDocumento", empleado.TipoDocumento),
 			sql.Named("NumeroDocumento", empleado.NumeroDocumento),
@@ -262,13 +270,13 @@ func IUEmpledo(contx context.Context, empleado *model.Empleado) string {
 		)
 		if err != nil {
 			tx.Rollback()
-			return "error"
+			return err.Error()
 		}
 
 		value, err := result.RowsAffected()
 		if err != nil {
 			tx.Rollback()
-			return "error"
+			return err.Error()
 		}
 
 		if value == 0 {
@@ -283,45 +291,31 @@ func IUEmpledo(contx context.Context, empleado *model.Empleado) string {
 	}
 }
 
-func DeleteEmpleado(contx context.Context, id string) string {
+func DeleteEmpleado(ctx context.Context, id string) string {
 
 	db, err := database.CreateConnection()
 	if err != nil {
-		return "error"
+		return err.Error()
 	}
 	defer db.Close()
 
-	var idEmpleado string
-	queryfunc := `SELECT TOP(1) * FROM EmpleadoTB WHERE IdEmpleado = @IdEmpleado AND Sistema = 1`
-
-	row := db.QueryRowContext(contx, queryfunc, sql.Named("IdEmpleado", id))
-	err = row.Scan(&idEmpleado)
-	if err == sql.ErrNoRows || err != nil {
-		return "empty"
-	}
-
-	if idEmpleado == "" {
-		return "El empleado no puede ser eliminado porque es parte del sistema."
-	}
-
-	tx, err := db.BeginTx(contx, nil)
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		tx.Rollback()
-		return "error"
+		return err.Error()
 	}
 
 	query := `DELETE FROM EmpleadoTB WHERE IdEmpleado = @IdEmpleado`
-
-	result, err := tx.ExecContext(contx, query, sql.Named("IdEmpleado", id))
+	result, err := tx.ExecContext(ctx, query, sql.Named("IdEmpleado", id))
 	if err != nil {
 		tx.Rollback()
-		return "error"
+		return err.Error()
 	}
 
 	value, err := result.RowsAffected()
 	if err != nil {
 		tx.Rollback()
-		return "error"
+		return err.Error()
 	}
 
 	if value == 0 {
@@ -332,4 +326,31 @@ func DeleteEmpleado(contx context.Context, id string) string {
 	tx.Commit()
 
 	return "delete"
+}
+
+func ValidarSistemaEmpledo(id string) string {
+
+	db, err := database.CreateConnection()
+	if err != nil {
+		return err.Error()
+	}
+	defer db.Close()
+
+	var idEmpleado, rpta string
+	query := `SELECT TOP(1) IdEmpleado FROM EmpleadoTB WHERE IdEmpleado = @IdEmpleado AND Sistema = 1`
+	row := db.QueryRow(query, sql.Named("IdEmpleado", id))
+	err = row.Scan(&idEmpleado)
+	if err == sql.ErrNoRows {
+		return "empty"
+	}
+	if err != nil {
+		return err.Error()
+	}
+
+	if idEmpleado == id {
+		rpta = "sistema"
+	}
+
+	return rpta
+
 }
