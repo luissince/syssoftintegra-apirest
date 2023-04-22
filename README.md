@@ -22,7 +22,7 @@ Siga los pasos para iniciar el desarrollo:
 
 1. Clona el proyecto del repositorio [Git Hub - syssoftintegra-apirest](https://github.com/luissince/syssoftintegra-apirest.git)
 2. Ejecute el comando: <pre>**go get**</pre>
-3. Crear en archivo **.env.examle** con el comando: <pre>**cp .env.examle .env**</pre> Despues configuramos las variable en el archivo **.env** de acuerdo a nuestras necesidades
+3. Copiar en archivo **.env.examle** con el comando: <pre>**cp .env.examle .env**</pre> Despues configuramos las variable en el archivo **.env** de acuerdo a nuestras necesidades
 4. Descargamos el paquete Air para autorecaragr la aplicación cuando detecte que algun archivo de go se guardó, esto lo hacemos con el comando: <pre>**go install github.com/cosmtrek/air@latest**</pre>
 5. Configuramos Air con el comando: <pre>**air init**</pre> Esto creara un archivo *.air.toml*
 6. Para lanzar o ejecutar la aplicación utilizamos el comando: <pre>**air**</pre>
