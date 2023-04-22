@@ -14,11 +14,17 @@ import (
 func connectionString() string {
 	godotenv.Load()
 
-	server := os.Getenv("HOSTNAME")
-	port := os.Getenv("PORT")
-	user := os.Getenv("USER_NAME")
-	password := os.Getenv("PASSWORD")
-	database := os.Getenv("DATABASE")
+	server := os.Getenv("SERVER_DB")
+	port := os.Getenv("PORT_DB")
+	user := os.Getenv("USER_DB")
+	password := os.Getenv("PASSWORD_DB")
+	database := os.Getenv("NAME_DB")
+
+	fmt.Println(server)
+	fmt.Println(port)
+	fmt.Println(user)
+	fmt.Println(password)
+	fmt.Println(database)
 
 	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", server, user, password, port, database)
 

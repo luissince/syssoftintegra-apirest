@@ -30,7 +30,12 @@ func corsMiddleware() gin.HandlerFunc {
 // Funcion princiapl de la aplicación.
 func main() {
 	// Cargar las variables de entorno
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error en cargar las viriables de entorno: ", err.Error())
+		return
+	}
+
 	var go_port string = os.Getenv("GO_PORT")
 	var tz_location string = os.Getenv("TZ_LOCATION")
 
@@ -51,7 +56,6 @@ func main() {
 	routes.MonedaRoutes(app.Group(basePath))
 
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	fmt.Println("GO PORT: ", go_port)
 	app.Run(go_port)
 
 	// Rutas del servicio de la API
