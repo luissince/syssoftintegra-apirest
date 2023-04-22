@@ -12,11 +12,7 @@ import (
 
 // connectionString -> Retorna la cadena de conexion en para sql server
 func connectionString() string {
-
-	err := godotenv.Load(".env")
-	if err != nil {
-		return err.Error()
-	}
+	godotenv.Load()
 
 	server := os.Getenv("HOSTNAME")
 	port := os.Getenv("PORT")

@@ -2,10 +2,14 @@ package main
 
 import (
 	// "fmt"
+	"fmt"
+	"os"
 	"syssoftintegra-api/src/routes"
+	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"github.com/joho/godotenv"
 
 	docs "syssoftintegra-api/docs"
 
@@ -13,14 +17,31 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func main() {
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		c.Writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		c.Next()
+	}
+}
 
+// Funcion princiapl de la aplicación.
+func main() {
+	// Cargar las variables de entorno
+	godotenv.Load()
+	var go_port string = os.Getenv("GO_PORT")
+	var tz_location string = os.Getenv("TZ_LOCATION")
+
+	// Estabecle la zora horario
+	time.LoadLocation(tz_location)
+
+	// Inicializa GIN para correr el servidor
 	app := gin.Default()
 
 	// Middleware para CORS
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	app.Use(cors.New(config))
+	app.Use(corsMiddleware())
 
 	// Agregar el swagger
 	basePath := "/api/v1"
@@ -30,7 +51,8 @@ func main() {
 	routes.MonedaRoutes(app.Group(basePath))
 
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	app.Run("localhost:3000")
+	fmt.Println("GO PORT: ", go_port)
+	app.Run(go_port)
 
 	// Rutas del servicio de la API
 	// router.GET(v1+"/login", service.Login)
