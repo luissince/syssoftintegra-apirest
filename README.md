@@ -28,4 +28,4 @@ Siga los pasos para iniciar el desarrollo:
 6. Para lanzar o ejecutar la aplicación utilizamos el comando: <pre>**air**</pre>
 7. Puede omitir usar la herramienta <code>**Air**</code> para la autorecarga y solo usar el comando: <pre>**go run main.go**</pre>
 
-<p>Espero te ayude 😛😜😝</p>
+<p>Espero te ayude 😛😜😝 MALDITA ZORRA</p>
