@@ -7,7 +7,9 @@ import (
 	"syssoftintegra-api/src/model"
 )
 
-func GetbancoByID(contx context.Context, id string) (model.Banco, string) {
+var contx_banco = context.Background()
+
+func GetbancoByID(id string) (model.Banco, string) {
 	banco := model.Banco{}
 
 	db, err := database.CreateConnection()
@@ -27,7 +29,7 @@ func GetbancoByID(contx context.Context, id string) (model.Banco, string) {
 	Mostrar 
 	FROM Banco WHERE IdBanco = @id`
 
-	row := db.QueryRowContext(contx, query, sql.Named("IdBanco", id))
+	row := db.QueryRowContext(contx_banco, query, sql.Named("IdBanco", id))
 
 	err = row.Scan(
 		&banco.IdBanco,

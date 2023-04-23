@@ -4,6 +4,41 @@
         "contact": {}
     },
     "paths": {
+        "/empresa": {
+            "get": {
+                "description": "Obtener la información de la empresa",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empresa"
+                ],
+                "summary": "Para obtener la empresa actual",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Empresa"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "get": {
                 "description": "Iniciar Sesión del Empleado",
@@ -95,6 +130,9 @@
                 "clave": {
                     "type": "string"
                 },
+                "count": {
+                    "type": "integer"
+                },
                 "detalle": {
                     "$ref": "#/definitions/model.Detalle"
                 },
@@ -144,6 +182,83 @@
                     "type": "integer"
                 },
                 "usuario": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Empresa": {
+            "type": "object",
+            "properties": {
+                "celular": {
+                    "type": "string"
+                },
+                "certificadoClave": {
+                    "type": "string"
+                },
+                "certificadoRuta": {
+                    "type": "string"
+                },
+                "claveApiSunat": {
+                    "type": "string"
+                },
+                "claveSol": {
+                    "type": "string"
+                },
+                "condiciones": {
+                    "type": "string"
+                },
+                "domicilio": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "giroComercial": {
+                    "type": "integer"
+                },
+                "idApiSunat": {
+                    "type": "string"
+                },
+                "idEmpresa": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "imagenRuta": {
+                    "type": "string"
+                },
+                "nombre": {
+                    "type": "string"
+                },
+                "nombreComercial": {
+                    "type": "string"
+                },
+                "numeroDocumento": {
+                    "type": "string"
+                },
+                "paginaWeb": {
+                    "type": "string"
+                },
+                "razonSocial": {
+                    "type": "string"
+                },
+                "telefono": {
+                    "type": "string"
+                },
+                "terminos": {
+                    "type": "string"
+                },
+                "tipoDocumento": {
+                    "type": "integer"
+                },
+                "ubigeo": {
+                    "type": "integer"
+                },
+                "usuarioSol": {
                     "type": "string"
                 }
             }

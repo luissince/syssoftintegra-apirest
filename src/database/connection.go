@@ -20,12 +20,6 @@ func connectionString() string {
 	password := os.Getenv("PASSWORD_DB")
 	database := os.Getenv("NAME_DB")
 
-	fmt.Println(server)
-	fmt.Println(port)
-	fmt.Println(user)
-	fmt.Println(password)
-	fmt.Println(database)
-
 	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;", server, user, password, port, database)
 
 	return connString

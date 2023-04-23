@@ -7,7 +7,9 @@ import (
 	"syssoftintegra-api/src/model"
 )
 
-func GetMonedaComboBox(ctx context.Context) ([]model.Moneda, string) {
+var contx_moneda = context.Background()
+
+func GetMonedaComboBox() ([]model.Moneda, string) {
 	monedas := []model.Moneda{}
 
 	db, err := database.CreateConnection()
@@ -17,7 +19,7 @@ func GetMonedaComboBox(ctx context.Context) ([]model.Moneda, string) {
 	defer db.Close()
 
 	query := `SELECT IdMoneda, Nombre, Simbolo, Predeterminado FROM MonedaTB`
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := db.QueryContext(contx_moneda, query)
 	if err == sql.ErrNoRows {
 		return nil, "empty"
 	}
@@ -39,7 +41,7 @@ func GetMonedaComboBox(ctx context.Context) ([]model.Moneda, string) {
 
 }
 
-func GetAllMoneda(ctx context.Context, opcion int, search string, posicionPagina int, filasPorPagina int) ([]model.Moneda, int, string) {
+func GetAllMoneda(opcion int, search string, posicionPagina int, filasPorPagina int) ([]model.Moneda, int, string) {
 
 	monedas := []model.Moneda{}
 
@@ -51,7 +53,7 @@ func GetAllMoneda(ctx context.Context, opcion int, search string, posicionPagina
 
 	query := `exec Sp_Listar_Monedas @opcion, @search, @posicionPagina, @filasPorPagina`
 
-	rows, err := db.QueryContext(ctx, query, sql.Named("opcion", opcion), sql.Named("search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
+	rows, err := db.QueryContext(contx_moneda, query, sql.Named("opcion", opcion), sql.Named("search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
 	if err == sql.ErrNoRows {
 		return nil, 0, "empty"
 	}
@@ -85,7 +87,7 @@ func GetAllMoneda(ctx context.Context, opcion int, search string, posicionPagina
 	var total int
 	queryTotal := `exec Sp_Listar_Monedas_Count @opcion, @search`
 
-	row := db.QueryRowContext(ctx, queryTotal, sql.Named("opcion", opcion), sql.Named("search", search))
+	row := db.QueryRowContext(contx_moneda, queryTotal, sql.Named("opcion", opcion), sql.Named("search", search))
 	err = row.Scan(&total)
 	if err == sql.ErrNoRows {
 		return nil, 0, "empty"
@@ -97,7 +99,7 @@ func GetAllMoneda(ctx context.Context, opcion int, search string, posicionPagina
 	return monedas, total, "ok"
 }
 
-func GetMonedaById(ctx context.Context, id int) (model.Moneda, string) {
+func GetMonedaById(id int) (model.Moneda, string) {
 	moneda := model.Moneda{}
 
 	db, err := database.CreateConnection()
@@ -107,7 +109,7 @@ func GetMonedaById(ctx context.Context, id int) (model.Moneda, string) {
 	defer db.Close()
 
 	query := `SELECT TOP 1 IdMoneda, Nombre, Abreviado, Simbolo, TipoCambio FROM MonedaTB WHERE IdMoneda = @IdMoneda`
-	row := db.QueryRowContext(ctx, query, sql.Named("IdMoneda", id))
+	row := db.QueryRowContext(contx_moneda, query, sql.Named("IdMoneda", id))
 	err = row.Scan(&moneda.IdMoneda, &moneda.Nombre, &moneda.Abreviado, &moneda.Simbolo, &moneda.TipoCambio)
 	if err == sql.ErrNoRows {
 		return moneda, "empty"
@@ -119,7 +121,7 @@ func GetMonedaById(ctx context.Context, id int) (model.Moneda, string) {
 	return moneda, "ok"
 }
 
-func InsertUpdateMoneda(ctx context.Context, moneda *model.Moneda) string {
+func InsertUpdateMoneda(moneda *model.Moneda) string {
 
 	db, err := database.CreateConnection()
 	if err != nil {
@@ -129,7 +131,7 @@ func InsertUpdateMoneda(ctx context.Context, moneda *model.Moneda) string {
 
 	if moneda.IdMoneda == 0 {
 		// INSERT
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(contx_moneda, nil)
 		if err != nil {
 			//tx.Rollback()
 			return err.Error()
@@ -138,7 +140,7 @@ func InsertUpdateMoneda(ctx context.Context, moneda *model.Moneda) string {
 		query := `INSERT INTO MonedaTB (Nombre, Abreviado, Simbolo, TipoCambio, Predeterminado, Sistema)
 				VALUES (@Nombre, @Abreviado, @Simbolo, @TipoCambio, @Predeterminado, @Sistema)`
 		result, err := tx.ExecContext(
-			ctx,
+			contx_moneda,
 			query,
 			sql.Named("Nombre", moneda.Nombre),
 			sql.Named("Abreviado", moneda.Abreviado),
@@ -169,7 +171,7 @@ func InsertUpdateMoneda(ctx context.Context, moneda *model.Moneda) string {
 
 	} else {
 		// UPDATE
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(contx_moneda, nil)
 		if err != nil {
 			//tx.Rollback()
 			return err.Error()
@@ -183,7 +185,7 @@ func InsertUpdateMoneda(ctx context.Context, moneda *model.Moneda) string {
 					Sistema = @Sistema 
 					WHERE IdMoneda = @IdMoneda`
 		result, err := tx.ExecContext(
-			ctx,
+			contx_moneda,
 			query,
 			sql.Named("Nombre", moneda.Nombre),
 			sql.Named("Abreviado", moneda.Abreviado),
@@ -216,7 +218,7 @@ func InsertUpdateMoneda(ctx context.Context, moneda *model.Moneda) string {
 
 }
 
-func DeleteMoneda(ctx context.Context, id int) string {
+func DeleteMoneda(id int) string {
 
 	db, err := database.CreateConnection()
 	if err != nil {
@@ -224,14 +226,14 @@ func DeleteMoneda(ctx context.Context, id int) string {
 	}
 	defer db.Close()
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := db.BeginTx(contx_moneda, nil)
 	if err != nil {
 		//tx.Rollback()
 		return err.Error()
 	}
 
 	query := `DELETE FROM MonedaTB WHERE IdMoneda = @IdMoneda`
-	result, err := tx.ExecContext(ctx, query, sql.Named("IdMoneda", id))
+	result, err := tx.ExecContext(contx_moneda, query, sql.Named("IdMoneda", id))
 	if err != nil {
 		tx.Rollback()
 		return err.Error()

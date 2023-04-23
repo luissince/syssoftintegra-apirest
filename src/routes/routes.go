@@ -6,6 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func EmpresaRoutes(router *gin.RouterGroup) {
+	router.GET("/empresa", controller.ObtenerEmpresa)
+}
+
 func EmpleadoRoutes(router *gin.RouterGroup) {
 	/*
 		usersRouter := router.Group("/users")

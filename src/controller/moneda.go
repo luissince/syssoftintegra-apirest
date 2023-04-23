@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"net/http"
 	"syssoftintegra-api/src/model"
 	"syssoftintegra-api/src/service"
@@ -11,11 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var ctx = context.Background()
-
 func GetMonedaComboBox(c *gin.Context) {
 
-	monedas, rpta := service.GetMonedaComboBox(ctx)
+	monedas, rpta := service.GetMonedaComboBox()
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No existe ninguna moneda"})
 		return
@@ -47,7 +44,7 @@ func GetAllMoneda(c *gin.Context) {
 		return
 	}
 
-	monedas, total, rpta := service.GetAllMoneda(ctx, opcion, search, posicionPagina, filasPorPagina)
+	monedas, total, rpta := service.GetAllMoneda(opcion, search, posicionPagina, filasPorPagina)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se encontraron registros"})
 		return
@@ -68,7 +65,7 @@ func GetMonedaById(c *gin.Context) {
 		return
 	}
 
-	moneda, rpta := service.GetMonedaById(ctx, idMoneda)
+	moneda, rpta := service.GetMonedaById(idMoneda)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "La moneda no existe"})
 		return
@@ -98,7 +95,7 @@ func InsertUpdateMoneda(c *gin.Context) {
 	}
 	if rpta == "empty" {
 
-		operacion := service.InsertUpdateMoneda(ctx, &moneda)
+		operacion := service.InsertUpdateMoneda(&moneda)
 		if operacion == "empty" {
 			c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
 			return
@@ -133,7 +130,7 @@ func DeleteMoneda(c *gin.Context) {
 		return
 	}
 	if rpta == "empty" {
-		operacion := service.DeleteMoneda(ctx, idMoneda)
+		operacion := service.DeleteMoneda(idMoneda)
 		if operacion == "empty" {
 			c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
 			return

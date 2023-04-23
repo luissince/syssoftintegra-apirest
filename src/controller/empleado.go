@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"net/http"
 	"strconv"
 	"syssoftintegra-api/src/model"
@@ -9,8 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-var contx = context.Background()
 
 // PingExample   godoc
 // @Summary 	 Para el inicio de sesión
@@ -30,7 +27,7 @@ func Login(c *gin.Context) {
 	usuario := c.Query("usuario")
 	clave := c.Query("clave")
 
-	empleado, rpta := service.Login(contx, usuario, clave)
+	empleado, rpta := service.Login(usuario, clave)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "El usuario o la clave es incorrecto, o no existe el usuario"})
 		return
@@ -67,7 +64,7 @@ func GetAllEmpleado(c *gin.Context) {
 	}
 
 	// Se hace la petición a la base de datos
-	empleados, total, rpta := service.GetAllEmpleado(contx, opcion, search, posicionPagina, filasPorPagina)
+	empleados, total, rpta := service.GetAllEmpleado(opcion, search, posicionPagina, filasPorPagina)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se encontraron resultados"})
 		return
@@ -84,7 +81,7 @@ func GetEmpleadoById(c *gin.Context) {
 
 	idEmpleado := c.Query("idEmpleado")
 
-	empleado, rpta := service.GetEmpleadoById(contx, idEmpleado)
+	empleado, rpta := service.GetEmpleadoById(idEmpleado)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se encontraron resultados"})
 		return
@@ -108,7 +105,7 @@ func InsertUpdateEmpledo(c *gin.Context) {
 		return
 	}
 
-	rpta := service.InsertUpdateEmpledo(contx, &empleado)
+	rpta := service.InsertUpdateEmpledo(&empleado)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
 		return
@@ -135,7 +132,7 @@ func DeleteEmpleado(c *gin.Context) {
 		return
 	}
 	if validar == "empty" {
-		operacion := service.DeleteEmpleado(contx, idEmpleado)
+		operacion := service.DeleteEmpleado(idEmpleado)
 		if operacion == "empty" {
 			c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
 			return

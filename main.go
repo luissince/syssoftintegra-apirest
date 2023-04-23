@@ -17,16 +17,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		c.Next()
-	}
-}
-
 // Funcion princiapl de la aplicación.
 func main() {
 	// Cargar las variables de entorno
@@ -52,6 +42,7 @@ func main() {
 	basePath := "/api/v1"
 	docs.SwaggerInfo.BasePath = basePath
 
+	routes.EmpresaRoutes(app.Group(basePath))
 	routes.EmpleadoRoutes(app.Group(basePath))
 	routes.MonedaRoutes(app.Group(basePath))
 
@@ -80,4 +71,14 @@ func main() {
 	//     "message": "No se encontró el usuario"
 	// }
 
+}
+
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		c.Writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		c.Next()
+	}
 }

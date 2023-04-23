@@ -26,7 +26,7 @@ type Empleado struct {
 	Sistema         bool      `json:"sistema,omitempty"`
 	Huella          string    `json:"huella,omitempty"`
 
-	Rol     Rol
-	Detalle Detalle
+	Rol     *Rol     `json:"rol,omitempty"`
+	Detalle *Detalle `json:"detalle,omitempty"`
 	// Huella sql.NullString `json:"huella"`
 }

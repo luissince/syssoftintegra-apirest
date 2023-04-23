@@ -8,8 +8,12 @@ import (
 	"syssoftintegra-api/src/model"
 )
 
-func Login(ctx context.Context, usuario string, clave string) (model.Empleado, string) {
+var contx_empleado = context.Background()
+
+func Login(usuario string, clave string) (model.Empleado, string) {
 	empleado := model.Empleado{}
+	rol := &model.Rol{}
+	empleado.Rol = rol
 
 	db, err := database.CreateConnection()
 	if err != nil {
@@ -18,7 +22,7 @@ func Login(ctx context.Context, usuario string, clave string) (model.Empleado, s
 	defer db.Close()
 
 	queryStore := `exec Sp_Validar_Ingreso @usuario, @clave`
-	row := db.QueryRowContext(ctx, queryStore, sql.Named("usuario", usuario), sql.Named("clave", clave))
+	row := db.QueryRowContext(contx_empleado, queryStore, sql.Named("usuario", usuario), sql.Named("clave", clave))
 
 	err = row.Scan(&empleado.IdEmpleado, &empleado.Apellidos, &empleado.Nombres, &empleado.Rol.Nombre, &empleado.Estado, &empleado.Estado)
 	if err == sql.ErrNoRows {
@@ -31,7 +35,7 @@ func Login(ctx context.Context, usuario string, clave string) (model.Empleado, s
 	return empleado, "ok"
 }
 
-func GetAllEmpleado(ctx context.Context, opcion int, search string, posicionPagina int, filasPorPagina int) ([]model.Empleado, int, string) {
+func GetAllEmpleado(opcion int, search string, posicionPagina int, filasPorPagina int) ([]model.Empleado, int, string) {
 
 	empleados := []model.Empleado{}
 
@@ -42,7 +46,7 @@ func GetAllEmpleado(ctx context.Context, opcion int, search string, posicionPagi
 	defer db.Close()
 
 	queryStoreOne := `exec Sp_Listar_Empleados @opcion, @search, @posicionPagina, @filasPorPagina`
-	rows, err := db.QueryContext(ctx, queryStoreOne, sql.Named("opcion", opcion), sql.Named("search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
+	rows, err := db.QueryContext(contx_empleado, queryStoreOne, sql.Named("opcion", opcion), sql.Named("search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
 	if err == sql.ErrNoRows {
 		return nil, 0, "empty"
 	}
@@ -73,7 +77,7 @@ func GetAllEmpleado(ctx context.Context, opcion int, search string, posicionPagi
 
 	var total int
 	queryStoreTwo := `exec Sp_Listar_Empleados_Count @opcion, @search`
-	row := db.QueryRowContext(ctx, queryStoreTwo, sql.Named("opcion", opcion), sql.Named("search", search))
+	row := db.QueryRowContext(contx_empleado, queryStoreTwo, sql.Named("opcion", opcion), sql.Named("search", search))
 	err = row.Scan(&total)
 	if err == sql.ErrNoRows {
 		return nil, 0, "empty"
@@ -85,7 +89,7 @@ func GetAllEmpleado(ctx context.Context, opcion int, search string, posicionPagi
 	return empleados, total, "ok"
 }
 
-func GetEmpleadoById(ctx context.Context, idEmpleado string) (model.Empleado, string) {
+func GetEmpleadoById(idEmpleado string) (model.Empleado, string) {
 
 	empleado := model.Empleado{}
 
@@ -118,7 +122,7 @@ func GetEmpleadoById(ctx context.Context, idEmpleado string) (model.Empleado, st
 
 	// query :=`SELECT TOP(1) * FROM EmpleadoTB WHERE IdEmpleado = @idEmpleado`
 
-	row := db.QueryRowContext(ctx, query, sql.Named("IdEmpleado", idEmpleado))
+	row := db.QueryRowContext(contx_empleado, query, sql.Named("IdEmpleado", idEmpleado))
 	err = row.Scan(
 		&empleado.IdEmpleado,
 		&empleado.TipoDocumento,
@@ -149,7 +153,7 @@ func GetEmpleadoById(ctx context.Context, idEmpleado string) (model.Empleado, st
 	return empleado, "ok"
 }
 
-func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
+func InsertUpdateEmpledo(empleado *model.Empleado) string {
 
 	db, err := database.CreateConnection()
 	if err != nil {
@@ -161,13 +165,13 @@ func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
 
 		var newId string
 		queryCodAlfa := `SELECT dbo.Fc_Empleado_Codigo_Alfanumerico()`
-		row := db.QueryRowContext(ctx, queryCodAlfa)
+		row := db.QueryRowContext(contx_empleado, queryCodAlfa)
 		err = row.Scan(&newId)
 		if err == sql.ErrNoRows || err != nil {
 			return err.Error()
 		}
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(contx_empleado, nil)
 		if err != nil {
 			tx.Rollback()
 			return err.Error()
@@ -177,7 +181,7 @@ func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
 				VALUES (IdEmpleado @TipoDocumento, @NumeroDocumento, @Apellidos, @Nombres, @Sexo, @FechaNacimiento, @Puesto, @Rol, @Estado, @Telefono, @Celular, @Email, @Direccion, @Usuario, @Clave, @Sistema, @Huella)`
 
 		result, err := tx.ExecContext(
-			ctx,
+			contx_empleado,
 			query,
 			sql.Named("IdEmpleado", newId),
 			sql.Named("TipoDocumento", empleado.TipoDocumento),
@@ -220,7 +224,7 @@ func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
 
 	} else {
 
-		tx, err := db.BeginTx(ctx, nil)
+		tx, err := db.BeginTx(contx_empleado, nil)
 		if err != nil {
 			tx.Rollback()
 			return err.Error()
@@ -247,7 +251,7 @@ func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
 			WHERE IdEmpleado = @IdEmpleado`
 
 		result, err := tx.ExecContext(
-			ctx,
+			contx_empleado,
 			query,
 			sql.Named("TipoDocumento", empleado.TipoDocumento),
 			sql.Named("NumeroDocumento", empleado.NumeroDocumento),
@@ -291,7 +295,7 @@ func InsertUpdateEmpledo(ctx context.Context, empleado *model.Empleado) string {
 	}
 }
 
-func DeleteEmpleado(ctx context.Context, id string) string {
+func DeleteEmpleado(id string) string {
 
 	db, err := database.CreateConnection()
 	if err != nil {
@@ -299,14 +303,14 @@ func DeleteEmpleado(ctx context.Context, id string) string {
 	}
 	defer db.Close()
 
-	tx, err := db.BeginTx(ctx, nil)
+	tx, err := db.BeginTx(contx_empleado, nil)
 	if err != nil {
 		tx.Rollback()
 		return err.Error()
 	}
 
 	query := `DELETE FROM EmpleadoTB WHERE IdEmpleado = @IdEmpleado`
-	result, err := tx.ExecContext(ctx, query, sql.Named("IdEmpleado", id))
+	result, err := tx.ExecContext(contx_empleado, query, sql.Named("IdEmpleado", id))
 	if err != nil {
 		tx.Rollback()
 		return err.Error()
