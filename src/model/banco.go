@@ -5,6 +5,8 @@ import (
 )
 
 type Banco struct {
+	Count int `json:"count,omitempty"`
+
 	IdBanco       string `json:"idBanco,omitempty"`
 	NombreCuenta  string `json:"nombreCuenta,omitempty"`
 	NumeroCuenta  string `json:"numeroCuenta,omitempty"`

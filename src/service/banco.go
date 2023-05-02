@@ -9,12 +9,12 @@ import (
 
 var contx_banco = context.Background()
 
-func GetbancoByID(id string) (model.Banco, string) {
+func GetBancoById(id string) (model.Banco, string) {
 	banco := model.Banco{}
 
 	db, err := database.CreateConnection()
 	if err != nil {
-		return banco, "error"
+		return banco, err.Error()
 	}
 	defer db.Close()
 
@@ -27,7 +27,7 @@ func GetbancoByID(id string) (model.Banco, string) {
 	Descripcion,
 	FormaPago,
 	Mostrar 
-	FROM Banco WHERE IdBanco = @id`
+	FROM Banco WHERE IdBanco = @IdBanco`
 
 	row := db.QueryRowContext(contx_banco, query, sql.Named("IdBanco", id))
 
@@ -41,8 +41,11 @@ func GetbancoByID(id string) (model.Banco, string) {
 		&banco.FormaPago,
 		&banco.Mostrar,
 	)
-	if err == sql.ErrNoRows || err != nil {
+	if err == sql.ErrNoRows {
 		return banco, "empty"
+	}
+	if err != nil {
+		return banco, err.Error()
 	}
 
 	return banco, "ok"
