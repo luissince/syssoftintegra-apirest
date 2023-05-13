@@ -45,6 +45,8 @@ func main() {
 	routes.EmpresaRoutes(app.Group(basePath))
 	routes.EmpleadoRoutes(app.Group(basePath))
 	routes.MonedaRoutes(app.Group(basePath))
+	routes.RolRoutes(app.Group(basePath))
+	routes.DetalleRoutes(app.Group(basePath))
 
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	app.Run(url_domain)

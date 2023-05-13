@@ -55,8 +55,19 @@ func GetAllEmpleado(opcion int, search string, posicionPagina int, filasPorPagin
 	}
 	defer rows.Close()
 
+	count := 0
+
 	for rows.Next() {
 		empleado := model.Empleado{}
+
+		rol := &model.Rol{}
+		empleado.Rol = rol
+
+		detalle := &model.Detalle{}
+		empleado.Detalle = detalle
+
+		count++
+		empleado.Id = count + posicionPagina
 
 		err := rows.Scan(
 			&empleado.IdEmpleado,
@@ -99,7 +110,7 @@ func GetEmpleadoById(idEmpleado string) (model.Empleado, string) {
 	}
 	defer db.Close()
 
-	query := `SELECT TOP(1)
+	query := `SELECT
 		IdEmpleado,
 		TipoDocumento,
 		NumeroDocumento,
@@ -119,8 +130,6 @@ func GetEmpleadoById(idEmpleado string) (model.Empleado, string) {
 		Sistema,
 		ISNULL(Huella, '') as Huella
 		FROM EmpleadoTB WHERE IdEmpleado = @idEmpleado`
-
-	// query :=`SELECT TOP(1) * FROM EmpleadoTB WHERE IdEmpleado = @idEmpleado`
 
 	row := db.QueryRowContext(contx_empleado, query, sql.Named("IdEmpleado", idEmpleado))
 	err = row.Scan(

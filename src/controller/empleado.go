@@ -41,6 +41,21 @@ func Login(c *gin.Context) {
 
 }
 
+// PingExample   godoc
+// @Summary 	 Lista de empleados o usarios del sistema
+// @Schemes
+// @Description  Listado de empleados o usuario con los datos principales
+// @Tags 		 Empleado
+// @Accept 		 json
+// @Produce 	 json
+// @Param opcion query int true "Opciones de filtro 0-libre 1-para iniciar la busqueda"
+// @Param search query string false "Datos para el filtro" default:""
+// @Param posicionPagina query int true "Inicio de la paginación"
+// @Param filasPorPagina query int true "Filas por paginación"
+// @Success 	 200  {object}  []model.Empleado
+// @Failure 	 400  {object}  model.Error
+// @Failure 	 500  {object}  model.Error
+// @Router /empleados [get]
 func GetAllEmpleado(c *gin.Context) {
 
 	//Se lee los parametros del la url
@@ -57,6 +72,7 @@ func GetAllEmpleado(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se puede parcear el tercer parametro"})
 		return
 	}
+
 	filasPorPagina, err := strconv.Atoi(c.Query("filasPorPagina"))
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se puede parcear el cuarto parametro"})
@@ -65,34 +81,37 @@ func GetAllEmpleado(c *gin.Context) {
 
 	// Se hace la petición a la base de datos
 	empleados, total, rpta := service.GetAllEmpleado(opcion, search, posicionPagina, filasPorPagina)
-	if rpta == "empty" {
+	if rpta != "ok" {
 		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se encontraron resultados"})
 		return
 	}
-	if rpta == "ok" {
-		c.IndentedJSON(http.StatusOK, gin.H{"total": total, "resultado": empleados})
-	}
 
-	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
-
+	c.IndentedJSON(http.StatusOK, gin.H{"total": total, "resultado": empleados})
 }
 
+// PingExample   godoc
+// @Summary 	 Obtener empleado po su Id
+// @Schemes
+// @Description  Ruta usada para traer datos relevante al momento de realizar una edición
+// @Tags 		 Empleado
+// @Accept 		 json
+// @Produce 	 json
+// @Param idEmpleado query string true "Id del empleado"
+// @Success 	 200  {object}  model.Empleado
+// @Failure 	 400  {object}  model.Error
+// @Failure 	 500  {object}  model.Error
+// @Router /empleado [get]
 func GetEmpleadoById(c *gin.Context) {
 
 	idEmpleado := c.Query("idEmpleado")
 
 	empleado, rpta := service.GetEmpleadoById(idEmpleado)
-	if rpta == "empty" {
+	if rpta != "ok" {
 		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se encontraron resultados"})
 		return
 	}
-	if rpta == "ok" {
-		c.IndentedJSON(http.StatusOK, empleado)
-		return
-	}
 
-	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
-
+	c.IndentedJSON(http.StatusOK, empleado)
 }
 
 func InsertUpdateEmpledo(c *gin.Context) {

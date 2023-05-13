@@ -45,3 +45,11 @@ func MonedaRoutes(router *gin.RouterGroup) {
 func BancoRoutes(router *gin.RouterGroup) {
 
 }
+
+func RolRoutes(router *gin.RouterGroup) {
+	router.GET("/listar-roles", controller.ListarRoles)
+}
+
+func DetalleRoutes(router *gin.RouterGroup) {
+	router.GET("/lista-detalle-idmantenimiento", controller.ListaDetalleIdMantenimiento)
+}

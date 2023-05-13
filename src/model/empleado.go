@@ -7,6 +7,7 @@ import (
 type Empleado struct {
 	Count int `json:"count,omitempty"`
 
+	Id              int       `json:"id,omitempty"`
 	IdEmpleado      string    `json:"idEmpleado,omitempty"`
 	TipoDocumento   int       `json:"tipoDocumento,omitempty"`
 	NumeroDocumento string    `json:"numeroDocumento,omitempty,omitempty"`
