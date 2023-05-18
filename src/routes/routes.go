@@ -15,23 +15,12 @@ func EmpresaRoutes(router *gin.RouterGroup) {
 }
 
 func EmpleadoRoutes(router *gin.RouterGroup) {
-	/*
-		usersRouter := router.Group("/users")
-
-			{
-				usersRouter.GET("/", getUsersHandler)
-				usersRouter.POST("/", createUserHandler)
-				usersRouter.PUT("/:id", updateUserHandler)
-				usersRouter.DELETE("/:id", deleteUserHandler)
-			}
-	*/
-
-	router.GET("/login", controller.Login)
+	router.POST("/login", controller.Login)
 	router.GET("/empleados", controller.GetAllEmpleado)
-	router.GET("/empleado", controller.GetEmpleadoById)
-	router.POST("/empleado", controller.InsertUpdateEmpledo)
+	router.GET("/empleado/:idEmpleado", controller.GetEmpleadoById)
+	router.POST("/empleado", controller.InsertEmpledo)
+	router.PUT("empleado", controller.UpdateEmpledo)
 	router.DELETE("/empleado/:idEmpleado", controller.DeleteEmpleado)
-
 }
 
 func MonedaRoutes(router *gin.RouterGroup) {

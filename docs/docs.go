@@ -58,6 +58,116 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "put": {
+                "description": "Proceso para actualizar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Actualizar Empleado",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Proceso para registrar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Registrar Empleado",
+                "parameters": [
+                    {
+                        "description": "Estructura para realizar la consulta",
+                        "name": "opcion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Empleado"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Proceso para actualizar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Actualizar Empleado",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
             }
         },
         "/empleados": {
@@ -255,7 +365,7 @@ const docTemplate = `{
             }
         },
         "/login": {
-            "get": {
+            "post": {
                 "description": "Iniciar Sesión del Empleado",
                 "consumes": [
                     "application/json"
@@ -269,18 +379,13 @@ const docTemplate = `{
                 "summary": "Para el inicio de sesión",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Usuario para iniciar sesión",
-                        "name": "usuario",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Clave para iniciar sesión",
-                        "name": "clave",
-                        "in": "query",
-                        "required": true
+                        "description": "Estructura para realizar la consulta",
+                        "name": "opcion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Login"
+                        }
                     }
                 ],
                 "responses": {
@@ -344,9 +449,6 @@ const docTemplate = `{
                 },
                 "clave": {
                     "type": "string"
-                },
-                "count": {
-                    "type": "integer"
                 },
                 "detalle": {
                     "$ref": "#/definitions/model.Detalle"
@@ -489,6 +591,17 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Login": {
+            "type": "object",
+            "properties": {
+                "clave": {
+                    "type": "string"
+                },
+                "usuario": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Rol": {
             "type": "object",
             "properties": {
@@ -511,12 +624,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Api de SysSoft Integra",
+	Description:      "Api para consultar las rutas de la aplicación.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

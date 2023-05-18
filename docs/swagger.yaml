@@ -24,8 +24,6 @@ definitions:
         type: string
       clave:
         type: string
-      count:
-        type: integer
       detalle:
         $ref: '#/definitions/model.Detalle'
       direccion:
@@ -119,6 +117,13 @@ definitions:
       message:
         type: string
     type: object
+  model.Login:
+    properties:
+      clave:
+        type: string
+      usuario:
+        type: string
+    type: object
   model.Rol:
     properties:
       id:
@@ -132,8 +137,33 @@ definitions:
     type: object
 info:
   contact: {}
+  description: Api para consultar las rutas de la aplicación.
+  title: Api de SysSoft Integra
+  version: "1.0"
 paths:
   /empleado:
+    delete:
+      consumes:
+      - application/json
+      description: Proceso para actualizar empleado con la estructura predefinida
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Actualizar Empleado
+      tags:
+      - Empleado
     get:
       consumes:
       - application/json
@@ -161,6 +191,57 @@ paths:
           schema:
             $ref: '#/definitions/model.Error'
       summary: Obtener empleado po su Id
+      tags:
+      - Empleado
+    post:
+      consumes:
+      - application/json
+      description: Proceso para registrar empleado con la estructura predefinida
+      parameters:
+      - description: Estructura para realizar la consulta
+        in: body
+        name: opcion
+        required: true
+        schema:
+          $ref: '#/definitions/model.Empleado'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Registrar Empleado
+      tags:
+      - Empleado
+    put:
+      consumes:
+      - application/json
+      description: Proceso para actualizar empleado con la estructura predefinida
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Actualizar Empleado
       tags:
       - Empleado
   /empleados:
@@ -294,21 +375,17 @@ paths:
       tags:
       - Rol
   /login:
-    get:
+    post:
       consumes:
       - application/json
       description: Iniciar Sesión del Empleado
       parameters:
-      - description: Usuario para iniciar sesión
-        in: query
-        name: usuario
+      - description: Estructura para realizar la consulta
+        in: body
+        name: opcion
         required: true
-        type: string
-      - description: Clave para iniciar sesión
-        in: query
-        name: clave
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/model.Login'
       produces:
       - application/json
       responses:

@@ -7,6 +7,7 @@ import (
 	"syssoftintegra-api/src/routes"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/joho/godotenv"
@@ -17,7 +18,21 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// func corsMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+// 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+// 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+// 		c.Writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
+// 		c.Next()
+// 	}
+// }
+
 // Funcion princiapl de la aplicación.
+
+// @title Api de SysSoft Integra
+// @version 1.0
+// @description Api para consultar las rutas de la aplicación.
 func main() {
 	// Cargar las variables de entorno
 	err := godotenv.Load()
@@ -36,7 +51,8 @@ func main() {
 	app := gin.Default()
 
 	// Middleware para CORS
-	app.Use(corsMiddleware())
+	//app.Use(corsMiddleware())
+	app.Use(cors.Default())
 
 	// Agregar el swagger
 	basePath := "/api/v1"
@@ -50,37 +66,4 @@ func main() {
 
 	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	app.Run(url_domain)
-
-	// Rutas del servicio de la API
-	// router.GET(v1+"/login", service.Login)
-
-	// GET /api/v1/users/:id
-	// Obtiene un usuario por su ID
-	//
-	// Respuesta exitosa:
-	// Código: 200
-	// Cuerpo:
-	// {
-	//     "id": 1,
-	//     "name": "Juan",
-	//     "email": "juan@example.com"
-	// }
-	//
-	// Respuesta de error:
-	// Código: 404
-	// Cuerpo:
-	// {
-	//     "message": "No se encontró el usuario"
-	// }
-
-}
-
-func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Writer.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		c.Next()
-	}
 }

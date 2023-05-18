@@ -1,7 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Api para consultar las rutas de la aplicación.",
+        "title": "Api de SysSoft Integra",
+        "contact": {},
+        "version": "1.0"
     },
     "paths": {
         "/empleado": {
@@ -31,6 +34,116 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Empleado"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Proceso para actualizar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Actualizar Empleado",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Proceso para registrar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Registrar Empleado",
+                "parameters": [
+                    {
+                        "description": "Estructura para realizar la consulta",
+                        "name": "opcion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Empleado"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Proceso para actualizar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Actualizar Empleado",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -243,7 +356,7 @@
             }
         },
         "/login": {
-            "get": {
+            "post": {
                 "description": "Iniciar Sesión del Empleado",
                 "consumes": [
                     "application/json"
@@ -257,18 +370,13 @@
                 "summary": "Para el inicio de sesión",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Usuario para iniciar sesión",
-                        "name": "usuario",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Clave para iniciar sesión",
-                        "name": "clave",
-                        "in": "query",
-                        "required": true
+                        "description": "Estructura para realizar la consulta",
+                        "name": "opcion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Login"
+                        }
                     }
                 ],
                 "responses": {
@@ -332,9 +440,6 @@
                 },
                 "clave": {
                     "type": "string"
-                },
-                "count": {
-                    "type": "integer"
                 },
                 "detalle": {
                     "$ref": "#/definitions/model.Detalle"
@@ -473,6 +578,17 @@
             "type": "object",
             "properties": {
                 "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Login": {
+            "type": "object",
+            "properties": {
+                "clave": {
+                    "type": "string"
+                },
+                "usuario": {
                     "type": "string"
                 }
             }

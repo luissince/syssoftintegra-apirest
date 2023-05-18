@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"syssoftintegra-api/src/database"
 	"syssoftintegra-api/src/model"
@@ -10,25 +9,39 @@ import (
 
 var contx_rol = context.Background()
 
-func ListarRoles() (model.Rol, string) {
-	rol := model.Rol{}
+func ListarRoles() ([]model.Rol, string) {
+	roles := []model.Rol{}
 
 	db, err := database.CreateConnection()
 	if err != nil {
 		fmt.Println(err.Error())
-		return rol, "Se cerro la conexión."
+		return roles, "Se cerro la conexión."
 	}
 
 	defer db.Close()
 
 	query := "SELECT IdRol,Nombre,Sistema FROM RolTB"
-	row := db.QueryRowContext(contx_rol, query)
+	rows, _ := db.QueryContext(contx_rol, query)
 
-	err = row.Scan(&rol.IdRol, &rol.Nombre, &rol.Sistema)
-	if err == sql.ErrNoRows || err != nil {
-		fmt.Println(err.Error())
-		return rol, "No pudo leer las filas requeridas."
+	defer rows.Close()
+
+	// err = row.Scan(&rol.IdRol, &rol.Nombre, &rol.Sistema)
+	// if err == sql.ErrNoRows || err != nil {
+	// 	fmt.Println(err.Error())
+	// 	return roles, "No pudo leer las filas requeridas."
+	// }
+
+	for rows.Next() {
+		rol := model.Rol{}
+
+		rows.Scan(
+			&rol.IdRol,
+			&rol.Nombre,
+			&rol.Sistema,
+		)
+
+		roles = append(roles, rol)
 	}
 
-	return rol, "ok"
+	return roles, "ok"
 }

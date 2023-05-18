@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"syssoftintegra-api/src/model"
@@ -16,18 +17,21 @@ import (
 // @Tags 		 Empleado
 // @Accept 		 json
 // @Produce 	 json
-// @Param usuario query string true "Usuario para iniciar sesión"
-// @Param clave query string true "Clave para iniciar sesión"
+// @Param opcion body  model.Login true "Estructura para realizar la consulta"
 // @Success 	 200  {object}  model.Empleado
 // @Failure 	 400  {object}  model.Error
 // @Failure 	 500  {object}  model.Error
-// @Router /login [get]
+// @Router /login [post]
 func Login(c *gin.Context) {
+	login := model.Login{}
 
-	usuario := c.Query("usuario")
-	clave := c.Query("clave")
+	err := c.BindJSON(&login)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se pudo parsear el body"})
+		return
+	}
 
-	empleado, rpta := service.Login(usuario, clave)
+	empleado, rpta := service.Login(login.Usuario, login.Clave)
 	if rpta == "empty" {
 		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "El usuario o la clave es incorrecto, o no existe el usuario"})
 		return
@@ -114,7 +118,54 @@ func GetEmpleadoById(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, empleado)
 }
 
-func InsertUpdateEmpledo(c *gin.Context) {
+// PingExample   godoc
+// @Summary 	 Registrar Empleado
+// @Schemes
+// @Description  Proceso para registrar empleado con la estructura predefinida
+// @Tags 		 Empleado
+// @Accept 		 json
+// @Produce 	 json
+// @Param opcion body  model.Empleado true "Estructura para realizar la consulta"
+// @Success 	 200  {string}  string
+// @Failure 	 400  {object}  model.Error
+// @Failure 	 500  {object}  model.Error
+// @Router /empleado [post]
+func InsertEmpledo(c *gin.Context) {
+	var empleado model.Empleado
+
+	rol := &model.Rol{}
+	empleado.Rol = rol
+
+	detalle := &model.Detalle{}
+	empleado.Detalle = detalle
+
+	if err := c.BindJSON(&empleado); err != nil {
+		fmt.Println(err)
+		c.IndentedJSON(http.StatusBadRequest, model.Error{Message: "No se pudo parsear el body"})
+		return
+	}
+
+	rpta := service.InsertEmpledo(&empleado)
+	if rpta != "insert" {
+		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, "Se registro correctamente el empleado.")
+}
+
+// PingExample   godoc
+// @Summary 	 Actualizar Empleado
+// @Schemes
+// @Description  Proceso para actualizar empleado con la estructura predefinida
+// @Tags 		 Empleado
+// @Accept 		 json
+// @Produce 	 json
+// @Success 	 200  {string}  string
+// @Failure 	 400  {object}  model.Error
+// @Failure 	 500  {object}  model.Error
+// @Router /empleado [put]
+func UpdateEmpledo(c *gin.Context) {
 
 	var empleado model.Empleado
 
@@ -124,24 +175,31 @@ func InsertUpdateEmpledo(c *gin.Context) {
 		return
 	}
 
-	rpta := service.InsertUpdateEmpledo(&empleado)
-	if rpta == "empty" {
-		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
-		return
-	}
+	rpta := service.UpdateEmpledo(&empleado)
 	if rpta == "update" {
 		c.IndentedJSON(http.StatusOK, gin.H{"message": rpta})
 		return
 	}
-	if rpta == "insert" {
-		c.IndentedJSON(http.StatusOK, gin.H{"message": rpta})
+
+	if rpta == "empty" {
+		c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: "No se pudo realizar la operación"})
 		return
 	}
 
 	c.IndentedJSON(http.StatusInternalServerError, model.Error{Message: rpta})
-
 }
 
+// PingExample   godoc
+// @Summary 	 Actualizar Empleado
+// @Schemes
+// @Description  Proceso para actualizar empleado con la estructura predefinida
+// @Tags 		 Empleado
+// @Accept 		 json
+// @Produce 	 json
+// @Success 	 200  {string}  string
+// @Failure 	 400  {object}  model.Error
+// @Failure 	 500  {object}  model.Error
+// @Router /empleado [delete]
 func DeleteEmpleado(c *gin.Context) {
 	idEmpleado := c.Param("idEmpleado")
 
