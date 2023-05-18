@@ -1,9 +1,233 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "Api para consultar las rutas de la aplicación.",
+        "title": "Api de SysSoft Integra",
+        "contact": {},
+        "version": "1.0"
     },
     "paths": {
+        "/empleado": {
+            "get": {
+                "description": "Ruta usada para traer datos relevante al momento de realizar una edición",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Obtener empleado po su Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id del empleado",
+                        "name": "idEmpleado",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Empleado"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Proceso para actualizar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Actualizar Empleado",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Proceso para registrar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Registrar Empleado",
+                "parameters": [
+                    {
+                        "description": "Estructura para realizar la consulta",
+                        "name": "opcion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Empleado"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Proceso para actualizar empleado con la estructura predefinida",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Actualizar Empleado",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/empleados": {
+            "get": {
+                "description": "Listado de empleados o usuario con los datos principales",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Empleado"
+                ],
+                "summary": "Lista de empleados o usarios del sistema",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Opciones de filtro 0-libre 1-para iniciar la busqueda",
+                        "name": "opcion",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Datos para el filtro",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Inicio de la paginación",
+                        "name": "posicionPagina",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filas por paginación",
+                        "name": "filasPorPagina",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Empleado"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/empresa": {
             "get": {
                 "description": "Obtener la información de la empresa",
@@ -39,8 +263,100 @@
                 }
             }
         },
-        "/login": {
+        "/lista-detalle-idmantenimiento": {
             "get": {
+                "description": "Obtener el listado de detalle por id mantenimiento",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Detalle"
+                ],
+                "summary": "Obtener detalle",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Opciones de filtro 0-libre 1-para excluir el nombre al inciar la busqueda",
+                        "name": "opcion",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Id del matenimiento",
+                        "name": "idMantenimiento",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "nombre a excluir",
+                        "name": "nombre",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Detalle"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/listar-roles": {
+            "get": {
+                "description": "Obtener el listado de roles para los modulos que necesiten",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Rol"
+                ],
+                "summary": "Lista de roles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Rol"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
                 "description": "Iniciar Sesión del Empleado",
                 "consumes": [
                     "application/json"
@@ -54,18 +370,13 @@
                 "summary": "Para el inicio de sesión",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Usuario para iniciar sesión",
-                        "name": "usuario",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Clave para iniciar sesión",
-                        "name": "clave",
-                        "in": "query",
-                        "required": true
+                        "description": "Estructura para realizar la consulta",
+                        "name": "opcion",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Login"
+                        }
                     }
                 ],
                 "responses": {
@@ -130,9 +441,6 @@
                 "clave": {
                     "type": "string"
                 },
-                "count": {
-                    "type": "integer"
-                },
                 "detalle": {
                     "$ref": "#/definitions/model.Detalle"
                 },
@@ -150,6 +458,9 @@
                 },
                 "huella": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "idEmpleado": {
                     "type": "string"
@@ -271,9 +582,23 @@
                 }
             }
         },
+        "model.Login": {
+            "type": "object",
+            "properties": {
+                "clave": {
+                    "type": "string"
+                },
+                "usuario": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Rol": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "idRol": {
                     "type": "integer"
                 },

@@ -24,8 +24,6 @@ definitions:
         type: string
       clave:
         type: string
-      count:
-        type: integer
       detalle:
         $ref: '#/definitions/model.Detalle'
       direccion:
@@ -38,6 +36,8 @@ definitions:
         type: string
       huella:
         type: string
+      id:
+        type: integer
       idEmpleado:
         type: string
       idRol:
@@ -117,8 +117,17 @@ definitions:
       message:
         type: string
     type: object
+  model.Login:
+    properties:
+      clave:
+        type: string
+      usuario:
+        type: string
+    type: object
   model.Rol:
     properties:
+      id:
+        type: integer
       idRol:
         type: integer
       nombre:
@@ -128,7 +137,158 @@ definitions:
     type: object
 info:
   contact: {}
+  description: Api para consultar las rutas de la aplicación.
+  title: Api de SysSoft Integra
+  version: "1.0"
 paths:
+  /empleado:
+    delete:
+      consumes:
+      - application/json
+      description: Proceso para actualizar empleado con la estructura predefinida
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Actualizar Empleado
+      tags:
+      - Empleado
+    get:
+      consumes:
+      - application/json
+      description: Ruta usada para traer datos relevante al momento de realizar una
+        edición
+      parameters:
+      - description: Id del empleado
+        in: query
+        name: idEmpleado
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Empleado'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Obtener empleado po su Id
+      tags:
+      - Empleado
+    post:
+      consumes:
+      - application/json
+      description: Proceso para registrar empleado con la estructura predefinida
+      parameters:
+      - description: Estructura para realizar la consulta
+        in: body
+        name: opcion
+        required: true
+        schema:
+          $ref: '#/definitions/model.Empleado'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Registrar Empleado
+      tags:
+      - Empleado
+    put:
+      consumes:
+      - application/json
+      description: Proceso para actualizar empleado con la estructura predefinida
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Actualizar Empleado
+      tags:
+      - Empleado
+  /empleados:
+    get:
+      consumes:
+      - application/json
+      description: Listado de empleados o usuario con los datos principales
+      parameters:
+      - description: Opciones de filtro 0-libre 1-para iniciar la busqueda
+        in: query
+        name: opcion
+        required: true
+        type: integer
+      - description: Datos para el filtro
+        in: query
+        name: search
+        type: string
+      - description: Inicio de la paginación
+        in: query
+        name: posicionPagina
+        required: true
+        type: integer
+      - description: Filas por paginación
+        in: query
+        name: filasPorPagina
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Empleado'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Lista de empleados o usarios del sistema
+      tags:
+      - Empleado
   /empresa:
     get:
       consumes:
@@ -152,22 +312,80 @@ paths:
       summary: Para obtener la empresa actual
       tags:
       - Empresa
-  /login:
+  /lista-detalle-idmantenimiento:
     get:
+      consumes:
+      - application/json
+      description: Obtener el listado de detalle por id mantenimiento
+      parameters:
+      - description: Opciones de filtro 0-libre 1-para excluir el nombre al inciar
+          la busqueda
+        in: query
+        name: opcion
+        required: true
+        type: string
+      - description: Id del matenimiento
+        in: query
+        name: idMantenimiento
+        required: true
+        type: string
+      - description: nombre a excluir
+        in: query
+        name: nombre
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Detalle'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Obtener detalle
+      tags:
+      - Detalle
+  /listar-roles:
+    get:
+      consumes:
+      - application/json
+      description: Obtener el listado de roles para los modulos que necesiten
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Rol'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Error'
+      summary: Lista de roles
+      tags:
+      - Rol
+  /login:
+    post:
       consumes:
       - application/json
       description: Iniciar Sesión del Empleado
       parameters:
-      - description: Usuario para iniciar sesión
-        in: query
-        name: usuario
+      - description: Estructura para realizar la consulta
+        in: body
+        name: opcion
         required: true
-        type: string
-      - description: Clave para iniciar sesión
-        in: query
-        name: clave
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/model.Login'
       produces:
       - application/json
       responses:

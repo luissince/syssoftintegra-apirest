@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"syssoftintegra-api/src/database"
 	"syssoftintegra-api/src/model"
@@ -55,8 +56,19 @@ func GetAllEmpleado(opcion int, search string, posicionPagina int, filasPorPagin
 	}
 	defer rows.Close()
 
+	count := 0
+
 	for rows.Next() {
 		empleado := model.Empleado{}
+
+		rol := &model.Rol{}
+		empleado.Rol = rol
+
+		detalle := &model.Detalle{}
+		empleado.Detalle = detalle
+
+		count++
+		empleado.Id = count + posicionPagina
 
 		err := rows.Scan(
 			&empleado.IdEmpleado,
@@ -99,7 +111,7 @@ func GetEmpleadoById(idEmpleado string) (model.Empleado, string) {
 	}
 	defer db.Close()
 
-	query := `SELECT TOP(1)
+	query := `SELECT
 		IdEmpleado,
 		TipoDocumento,
 		NumeroDocumento,
@@ -119,8 +131,6 @@ func GetEmpleadoById(idEmpleado string) (model.Empleado, string) {
 		Sistema,
 		ISNULL(Huella, '') as Huella
 		FROM EmpleadoTB WHERE IdEmpleado = @idEmpleado`
-
-	// query :=`SELECT TOP(1) * FROM EmpleadoTB WHERE IdEmpleado = @idEmpleado`
 
 	row := db.QueryRowContext(contx_empleado, query, sql.Named("IdEmpleado", idEmpleado))
 	err = row.Scan(
@@ -153,146 +163,191 @@ func GetEmpleadoById(idEmpleado string) (model.Empleado, string) {
 	return empleado, "ok"
 }
 
-func InsertUpdateEmpledo(empleado *model.Empleado) string {
+func InsertEmpledo(empleado *model.Empleado) string {
+	// Obtén la conexión de la base de datos
+	db, err := database.CreateConnection()
+	if err != nil {
+		return "No se puedo establecer conexión, intente nuevamente en un par de minutos."
+	}
 
+	// Cerramos la consulta al final de la transacción "defer libera la consulta aunque falla la ejecución"
+	defer db.Close()
+
+	// Inicia la transacción
+	tx, err := db.BeginTx(contx_empleado, nil)
+	if err != nil {
+		tx.Rollback()
+		return "No se pudo crear el contexto para la transacción."
+	}
+
+	// Se obtener el código único del empleado
+	var idEmpleado string
+	queryCodAlfa := `SELECT dbo.Fc_Empleado_Codigo_Alfanumerico()`
+	row := db.QueryRowContext(contx_empleado, queryCodAlfa)
+	err = row.Scan(&idEmpleado)
+
+	if err != nil {
+		tx.Rollback()
+		return "No fue posible obtener el código de empleado."
+	}
+
+	// Consulta para registrar empleado
+	query := `INSERT INTO EmpleadoTB (
+				IdEmpleado,
+				TipoDocumento,
+				NumeroDocumento,
+				Apellidos,
+				Nombres,
+				Sexo,
+				FechaNacimiento,
+				Puesto,
+				Rol,
+				Estado,
+				Telefono,
+				Celular,
+				Email,
+				Direccion,
+				Usuario,
+				Clave,
+				Sistema,
+				Huella)
+				VALUES (
+				@IdEmpleado,
+				@TipoDocumento,
+				@NumeroDocumento,
+				@Apellidos,
+				@Nombres,
+				@Sexo,
+				@FechaNacimiento,
+				@Puesto,
+				@Rol,
+				@Estado,
+				@Telefono,
+				@Celular,
+				@Email,
+				@Direccion,
+				@Usuario,
+				@Clave,
+				@Sistema,
+				@Huella)`
+
+	// Ejecuta la consulta dentro de la transacción
+	_, err = tx.ExecContext(
+		contx_empleado,
+		query,
+		sql.Named("IdEmpleado", idEmpleado),
+		sql.Named("TipoDocumento", empleado.TipoDocumento),
+		sql.Named("NumeroDocumento", empleado.NumeroDocumento),
+		sql.Named("Apellidos", empleado.Apellidos),
+		sql.Named("Nombres", empleado.Nombres),
+		sql.Named("Sexo", empleado.Sexo),
+		sql.Named("FechaNacimiento", empleado.FechaNacimiento),
+		sql.Named("Puesto", empleado.Puesto),
+		sql.Named("Rol", empleado.IdRol),
+		sql.Named("Estado", empleado.Estado),
+		sql.Named("Telefono", empleado.Telefono),
+		sql.Named("Celular", empleado.Celular),
+		sql.Named("Email", empleado.Email),
+		sql.Named("Direccion", empleado.Direccion),
+		sql.Named("Usuario", empleado.Usuario),
+		sql.Named("Clave", empleado.Clave),
+		sql.Named("Sistema", empleado.Sistema),
+		sql.Named("Huella", empleado.Huella),
+	)
+
+	// Si ocurre un error, haz un rollback de la transacción.
+	if err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return "No se pudo registrar los datos."
+	}
+
+	// Si toda ha sido bien, haz commit de la transacción
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return "El genero un problema al guardar la transacción."
+	}
+
+	return "insert"
+}
+
+func UpdateEmpledo(empleado *model.Empleado) string {
 	db, err := database.CreateConnection()
 	if err != nil {
 		return err.Error()
 	}
+
 	defer db.Close()
 
-	if empleado.IdEmpleado == "" {
+	tx, err := db.BeginTx(contx_empleado, nil)
+	if err != nil {
+		tx.Rollback()
+		return err.Error()
+	}
 
-		var newId string
-		queryCodAlfa := `SELECT dbo.Fc_Empleado_Codigo_Alfanumerico()`
-		row := db.QueryRowContext(contx_empleado, queryCodAlfa)
-		err = row.Scan(&newId)
-		if err == sql.ErrNoRows || err != nil {
-			return err.Error()
-		}
-
-		tx, err := db.BeginTx(contx_empleado, nil)
-		if err != nil {
-			tx.Rollback()
-			return err.Error()
-		}
-
-		query := `INSERT INTO EmpleadoTB (IdEmpleado, TipoDocumento, NumeroDocumento, Apellidos, Nombres, Sexo, FechaNacimiento, Puesto, Rol, Estado, Telefono, Celular, Email, Direccion, Usuario, Clave, Sistema, Huella)
-				VALUES (IdEmpleado @TipoDocumento, @NumeroDocumento, @Apellidos, @Nombres, @Sexo, @FechaNacimiento, @Puesto, @Rol, @Estado, @Telefono, @Celular, @Email, @Direccion, @Usuario, @Clave, @Sistema, @Huella)`
-
-		result, err := tx.ExecContext(
-			contx_empleado,
-			query,
-			sql.Named("IdEmpleado", newId),
-			sql.Named("TipoDocumento", empleado.TipoDocumento),
-			sql.Named("NumeroDocumento", empleado.NumeroDocumento),
-			sql.Named("Apellidos", empleado.Apellidos),
-			sql.Named("Nombres", empleado.Nombres),
-			sql.Named("Sexo", empleado.Sexo),
-			sql.Named("FechaNacimiento", empleado.FechaNacimiento),
-			sql.Named("Puesto", empleado.Puesto),
-			sql.Named("Rol", empleado.Rol),
-			sql.Named("Estado", empleado.Estado),
-			sql.Named("Telefono", empleado.Telefono),
-			sql.Named("Celular", empleado.Celular),
-			sql.Named("Email", empleado.Email),
-			sql.Named("Direccion", empleado.Direccion),
-			sql.Named("Usuario", empleado.Usuario),
-			sql.Named("Clave", empleado.Clave),
-			sql.Named("Sistema", empleado.Sistema),
-			sql.Named("Huella", empleado.Huella),
-		)
-		if err != nil {
-			tx.Rollback()
-			return err.Error()
-		}
-
-		value, err := result.RowsAffected()
-		if err != nil {
-			tx.Rollback()
-			return err.Error()
-		}
-
-		if value == 0 {
-			tx.Rollback()
-			return "empty"
-		}
-
-		tx.Commit()
-
-		return "insert"
-
-	} else {
-
-		tx, err := db.BeginTx(contx_empleado, nil)
-		if err != nil {
-			tx.Rollback()
-			return err.Error()
-		}
-
-		query := `UPDATE EmpleadoTB SET 
-			TipoDocumento =@TipoDocumento, 
-			NumeroDocumento =@NumeroDocumento, 
-			Apellidos =@Apellidos, 
-			Nombres =@Nombres, 
-			Sexo =@Sexo, 
-			FechaNacimiento =@FechaNacimiento, 
-			Puesto =@Puesto, 
-			Rol =@Rol, 
+	query := `UPDATE EmpleadoTB SET
+			TipoDocumento =@TipoDocumento,
+			NumeroDocumento =@NumeroDocumento,
+			Apellidos =@Apellidos,
+			Nombres =@Nombres,
+			Sexo =@Sexo,
+			FechaNacimiento =@FechaNacimiento,
+			Puesto =@Puesto,
+			Rol =@Rol,
 			Estado =@Estado,
-			Telefono =@Telefono, 
-			Celular =@Celular, 
-			Email =@Email, 
-			Direccion =@Direccion, 
-			Usuario =@Usuario, 
-			Clave =@Clave, 
-			Sistema =@Sistema, 
+			Telefono =@Telefono,
+			Celular =@Celular,
+			Email =@Email,
+			Direccion =@Direccion,
+			Usuario =@Usuario,
+			Clave =@Clave,
+			Sistema =@Sistema,
 			Huella =@Huella)
 			WHERE IdEmpleado = @IdEmpleado`
 
-		result, err := tx.ExecContext(
-			contx_empleado,
-			query,
-			sql.Named("TipoDocumento", empleado.TipoDocumento),
-			sql.Named("NumeroDocumento", empleado.NumeroDocumento),
-			sql.Named("Apellidos", empleado.Apellidos),
-			sql.Named("Nombres", empleado.Nombres),
-			sql.Named("Sexo", empleado.Sexo),
-			sql.Named("FechaNacimiento", empleado.FechaNacimiento),
-			sql.Named("Puesto", empleado.Puesto),
-			sql.Named("Rol", empleado.Rol),
-			sql.Named("Estado", empleado.Estado),
-			sql.Named("Telefono", empleado.Telefono),
-			sql.Named("Celular", empleado.Celular),
-			sql.Named("Email", empleado.Email),
-			sql.Named("Direccion", empleado.Direccion),
-			sql.Named("Usuario", empleado.Usuario),
-			sql.Named("Clave", empleado.Clave),
-			sql.Named("Sistema", empleado.Sistema),
-			sql.Named("Huella", empleado.Huella),
-			sql.Named("IdEmpleado", empleado.IdEmpleado),
-		)
-		if err != nil {
-			tx.Rollback()
-			return err.Error()
-		}
-
-		value, err := result.RowsAffected()
-		if err != nil {
-			tx.Rollback()
-			return err.Error()
-		}
-
-		if value == 0 {
-			tx.Rollback()
-			return "empty"
-		}
-
-		tx.Commit()
-
-		return "update"
-
+	result, err := tx.ExecContext(
+		contx_empleado,
+		query,
+		sql.Named("TipoDocumento", empleado.TipoDocumento),
+		sql.Named("NumeroDocumento", empleado.NumeroDocumento),
+		sql.Named("Apellidos", empleado.Apellidos),
+		sql.Named("Nombres", empleado.Nombres),
+		sql.Named("Sexo", empleado.Sexo),
+		sql.Named("FechaNacimiento", empleado.FechaNacimiento),
+		sql.Named("Puesto", empleado.Puesto),
+		sql.Named("Rol", empleado.Rol),
+		sql.Named("Estado", empleado.Estado),
+		sql.Named("Telefono", empleado.Telefono),
+		sql.Named("Celular", empleado.Celular),
+		sql.Named("Email", empleado.Email),
+		sql.Named("Direccion", empleado.Direccion),
+		sql.Named("Usuario", empleado.Usuario),
+		sql.Named("Clave", empleado.Clave),
+		sql.Named("Sistema", empleado.Sistema),
+		sql.Named("Huella", empleado.Huella),
+		sql.Named("IdEmpleado", empleado.IdEmpleado),
+	)
+	if err != nil {
+		tx.Rollback()
+		return err.Error()
 	}
+
+	value, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err.Error()
+	}
+
+	if value == 0 {
+		tx.Rollback()
+		return "empty"
+	}
+
+	// Si toda ha sido bien, haz commit de la transacción
+	tx.Commit()
+
+	return "update"
 }
 
 func DeleteEmpleado(id string) string {
