@@ -5,12 +5,12 @@ import (
 )
 
 type Banco struct {
-	Count int `json:"count,omitempty"`
+	Id int `json:"id,omitempty"`
 
-	IdBanco       string `json:"idBanco,omitempty"`
-	NombreCuenta  string `json:"nombreCuenta,omitempty"`
-	NumeroCuenta  string `json:"numeroCuenta,omitempty"`
-	Moneda        Moneda
+	IdBanco       string    `json:"idBanco,omitempty"`
+	NombreCuenta  string    `json:"nombreCuenta,omitempty"`
+	NumeroCuenta  string    `json:"numeroCuenta,omitempty"`
+	IdMoneda      int       `json:"idMoneda,omitempty"`
 	SaldoInicial  float64   `json:"saldoInicial,omitempty"`
 	FechaCreacion time.Time `json:"fechaCreacion,omitempty"`
 	HoraCreacion  time.Time `json:"horaCreacion,omitempty"`
@@ -18,4 +18,6 @@ type Banco struct {
 	Sistema       bool      `json:"sistema,omitempty"`
 	FormaPago     int16     `json:"formaPago,omitempty"`
 	Mostrar       bool      `json:"mostrar,omitempty"`
+
+	Moneda *Moneda `json:"Moneda,omitempty"`
 }
