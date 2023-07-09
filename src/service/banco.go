@@ -7,7 +7,7 @@ import (
 	"syssoftintegra-api/src/model"
 )
 
-var ctx_banco = context.Background()
+var contx_banco = context.Background()
 
 func GetAllBanco(search string, posicionPagina int, filasPorPagina int) ([]model.Banco, int, string) {
 	bancos := []model.Banco{}
@@ -18,7 +18,7 @@ func GetAllBanco(search string, posicionPagina int, filasPorPagina int) ([]model
 	defer db.Close()
 
 	queryStoreOne := `exec Sp_Listar_Bancos @search, @posicionPagina, @filasPorPagina`
-	rows, err := db.QueryContext(ctx_banco, queryStoreOne, sql.Named("@search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
+	rows, err := db.QueryContext(contx_banco, queryStoreOne, sql.Named("@search", search), sql.Named("posicionPagina", posicionPagina), sql.Named("filasPorPagina", filasPorPagina))
 	if err == sql.ErrNoRows {
 		return nil, 0, "empty"
 	}
@@ -55,7 +55,7 @@ func GetAllBanco(search string, posicionPagina int, filasPorPagina int) ([]model
 
 	var total int
 	queryStoreTwo := `exec Sp_Listar_Bancos_Count @search`
-	row := db.QueryRowContext(ctx_banco, queryStoreTwo, sql.Named("search", search))
+	row := db.QueryRowContext(contx_banco, queryStoreTwo, sql.Named("search", search))
 	err = row.Scan(&total)
 	if err == sql.ErrNoRows {
 		return nil, 0, "empty"
@@ -88,7 +88,7 @@ func GetBancoById(id string) (model.Banco, string) {
 	Mostrar 
 	FROM Banco WHERE IdBanco = @IdBanco`
 
-	row := db.QueryRowContext(ctx_banco, query, sql.Named("IdBanco", id))
+	row := db.QueryRowContext(contx_banco, query, sql.Named("IdBanco", id))
 
 	err = row.Scan(
 		&banco.IdBanco,
@@ -117,14 +117,14 @@ func DeleteBanco(id string) string {
 	}
 	defer db.Close()
 
-	tx, err := db.BeginTx(ctx_banco, nil)
+	tx, err := db.BeginTx(contx_banco, nil)
 	if err != nil {
 		tx.Rollback()
 		return err.Error()
 	}
 
 	query := `DELETE FROM Banco WHERE IdBanco = @IdBanco`
-	result, err := tx.ExecContext(ctx_banco, query, sql.Named("IdBanco", id))
+	result, err := tx.ExecContext(contx_banco, query, sql.Named("IdBanco", id))
 	if err != nil {
 		tx.Rollback()
 		return err.Error()

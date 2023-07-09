@@ -1,7 +1,7 @@
 package model
 
 type Moneda struct {
-	Count int `json:"count,omitempty"`
+	Id int `json:"id,omitempty"`
 
 	IdMoneda       int     `json:"idMoneda,omitempty"`
 	Nombre         string  `json:"nombre,omitempty"`

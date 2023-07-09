@@ -68,7 +68,7 @@ func GetAllMoneda(opcion int, search string, posicionPagina int, filasPorPagina 
 		count++
 
 		moneda := model.Moneda{}
-		moneda.Count = count
+		moneda.Id = count
 
 		err := rows.Scan(
 			&moneda.IdMoneda,
@@ -97,6 +97,7 @@ func GetAllMoneda(opcion int, search string, posicionPagina int, filasPorPagina 
 	}
 
 	return monedas, total, "ok"
+
 }
 
 func GetMonedaById(id int) (model.Moneda, string) {
@@ -173,17 +174,17 @@ func InsertUpdateMoneda(moneda *model.Moneda) string {
 		// UPDATE
 		tx, err := db.BeginTx(contx_moneda, nil)
 		if err != nil {
-			//tx.Rollback()
+			tx.Rollback()
 			return err.Error()
 		}
 
 		query := `UPDATE MonedaTB SET Nombre = @Nombre, 
-					Abreviado = @Abreviado, 
-					Simbolo = @Simbolo, 
-					TipoCambio = @TipoCambio, 
-					Predeterminado = @Predeterminado, 
-					Sistema = @Sistema 
-					WHERE IdMoneda = @IdMoneda`
+				Abreviado = @Abreviado, 
+				Simbolo = @Simbolo, 
+				TipoCambio = @TipoCambio, 
+				Predeterminado = @Predeterminado, 
+				Sistema = @Sistema 
+				WHERE IdMoneda = @IdMoneda`
 		result, err := tx.ExecContext(
 			contx_moneda,
 			query,
@@ -228,7 +229,7 @@ func DeleteMoneda(id int) string {
 
 	tx, err := db.BeginTx(contx_moneda, nil)
 	if err != nil {
-		//tx.Rollback()
+		tx.Rollback()
 		return err.Error()
 	}
 

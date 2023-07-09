@@ -32,7 +32,7 @@ func MonedaRoutes(router *gin.RouterGroup) {
 }
 
 func BancoRoutes(router *gin.RouterGroup) {
-
+	
 }
 
 func RolRoutes(router *gin.RouterGroup) {

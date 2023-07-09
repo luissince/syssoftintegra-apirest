@@ -632,8 +632,6 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "Api para consultar las rutas de la aplicación.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-	LeftDelim:        "{{",
-	RightDelim:       "}}",
 }
 
 func init() {
